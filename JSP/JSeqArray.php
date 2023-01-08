@@ -59,11 +59,11 @@ class JSeqArray {
   }
 
   function includes($value) {
-
+    return in_array($value, $this->array);
   }
 
   function forEach($callback) {
-    $newArray = $this->clone();
+    $newArray = $this->clone()->getResult();
     array_walk($newArray, $callback);
   }
 
@@ -71,16 +71,19 @@ class JSeqArray {
     return new JSeqArray($this->array);
   }
 
-  function join($separator) {
-
+  function join($separator = ',') {
+    implode($separator, $this->array);
   }
 
-  function push($value) {
+  function push(...$values) {
+    $newArray = $this->clone()->getResult();
+    array_push($newArray, $values);
 
+    return $newArray;
   }
 
   function pop() {
-
+    return array_pop($this->array);
   }
 
   function shift() {
