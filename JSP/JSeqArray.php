@@ -13,7 +13,7 @@ class JSeqArray {
   }
   
   function filter($callback) {
-    $newArray = array_filter($this->array, $callback);
+    $newArray = array_filter($this->array, $callback, ARRAY_FILTER_USE_BOTH);
     return new JSeqArray($newArray);
   }
 
@@ -47,7 +47,7 @@ class JSeqArray {
   }
 
   function find($callback) {
-
+    
   }
 
   function indexOf($value) {
@@ -63,7 +63,12 @@ class JSeqArray {
   }
 
   function forEach($callback) {
+    $newArray = $this->clone();
+    array_walk($newArray, $callback);
+  }
 
+  function clone() {
+    return new JSeqArray($this->array);
   }
 
   function join($separator) {
