@@ -17,13 +17,27 @@ class JSeqArray {
     return new JSeqArray($newArray);
   }
 
+  /**
+   * @return array
+   */
+
   function getResult() {
     return $this->array;
   }
 
+  /**
+   * @return number
+   */
+
   function getLength() {
     return count($this->array);
   }
+
+
+
+  /**
+   * @param callable $callback (mixed $item, number $index, array $array): mixed
+   */
   
   function some($callback) {
     return $this->filter($callback)->getLength() !== 0;
@@ -47,15 +61,39 @@ class JSeqArray {
   }
 
   function find($callback) {
-    
+    $result = null;
+
+    foreach($this->array as $index => $item) {
+      if($callback($item, $index)) {
+        $result = $item;
+        break;
+      }
+    }
+
+    return $result;
   }
 
   function indexOf($value) {
-
+    $result = array_search($value, $this->array);
+    return $result === false ? -1 : $result;
   }
 
   function flat($depth = 1) {
+    function iter($depth, $current, $result = []) {
+      if($depth === 0) return $current;
 
+      foreach($current as $item) {
+        if(is_array($item)) {
+          $result = array_merge($result, iter($depth - 1, $item));
+        } else {
+          array_push($result, $item);
+        }
+      }
+
+      return $result;
+    }
+
+    return iter($depth, $this->array);
   }
 
   function includes($value) {
@@ -87,15 +125,15 @@ class JSeqArray {
   }
 
   function shift() {
-
+    return array_shift($this->array);
   }
 
-  function unshift() {
-
+  function unshift(...$values) {
+    return array_unshift($this->array, $values);
   }
 
-  function reduce($callback) {
-
+  function reduce($callback, $initial = 0) {
+    return array_reduce($this->array, $callback, $initial);
   }
 
   function slice($start, $end) {
@@ -103,10 +141,14 @@ class JSeqArray {
   }
 
   function sort($callback) {
-
+    return usort($this->clone()->getResult(), $callback);
   }
 
   function concat(...$arrays) {
+    return array_merge($this->array, $arrays);
+  }
 
+  function reverse() {
+    return array_reverse($this->array);
   }
 }
