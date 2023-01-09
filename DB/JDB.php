@@ -1,4 +1,4 @@
-<?
+<?php
 
 class JDB {
   function __construct($host, $user, $password, $dbName) {

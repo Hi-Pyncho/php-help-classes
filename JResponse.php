@@ -1,6 +1,9 @@
-<?
+<?php
 
 class Response {
+  private $responseData;
+  private $statuses;
+
   function __construct() {
     $this->responseData = [
       'status' => 'pending',

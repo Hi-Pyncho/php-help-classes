@@ -1,4 +1,4 @@
-<?
+<?php
 
 class JString {
   protected $string;

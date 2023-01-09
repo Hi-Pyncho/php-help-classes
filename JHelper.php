@@ -1,4 +1,4 @@
-<?
+<?php
 
 class JHelper {
   static function debug($data) {
