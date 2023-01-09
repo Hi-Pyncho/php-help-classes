@@ -7,47 +7,86 @@ class JSeqArray {
     $this->array = $array;
   }
 
-  function map($callback) {
-    $newArray = array_map($callback, $this->array);
-    return new JSeqArray($newArray);
-  }
-  
-  function filter($callback) {
-    $newArray = array_filter($this->array, $callback, ARRAY_FILTER_USE_BOTH);
-    return new JSeqArray($newArray);
-  }
-
   /**
    * @return array
-   */
-
+  */
   function getResult() {
     return $this->array;
   }
 
   /**
-   * @return number
-   */
-
+   * @return int
+  */
   function getLength() {
     return count($this->array);
   }
 
-
-
   /**
-   * @param callable $callback (mixed $item, number $index, array $array): mixed
-   */
-  
-  function some($callback) {
-    return $this->filter($callback)->getLength() !== 0;
+   * @param int $index
+  */
+  function at(int $index) {
+    if($index < 0) {
+      return $this->array[$this->getLength() + $index];
+    }
+
+    return $this->array[$index];
   }
 
-  function every($callback) {
+  /**
+   * @param callable $callback (mixed $item, int $index, array $array): mixed
+   * @return JSeqArray
+  */
+  function map(callable $callback) {
+    $newArray = [];
+
+    foreach($this->array as $index => $item) {
+      array_push($newArray, $callback($item, $index, $this->array));
+    }
+
+    return new JSeqArray($newArray);
+  }
+  
+  /**
+   * @param callable $callback (mixed $item, int $index, array $array): boolean
+   * @return JSeqArray
+  */
+  function filter(callable $callback) {
+    $newArray = [];
+
+    foreach($this->array as $index => $item) {
+      if($callback($item, $index, $this->array)) {
+        array_push($newArray, $item);
+      }
+    }
+
+    return new JSeqArray($newArray);
+  }
+
+  /**
+   * @param callable $callback (mixed $item, int $index, array $array): boolean
+   * @return boolean
+  */
+  function some(callable $callback) {
+    $result = false;
+
+    foreach($this->array as $index => $item) {
+      if($callback($item, $index, $this->array)) {
+        $result = true;
+        break;
+      }
+    }
+
+    return $result;
+  }
+
+  /**
+   * @param callable $callback (mixed $item, int $index, array $array): boolean
+  */
+  function every(callable $callback) {
     $result = true;
 
-    foreach($this->array as $item) {
-      if(!$callback($item)) {
+    foreach($this->array as $index => $item) {
+      if(!$callback($item, $index, $this->array)) {
         $result = false;
         break;
       }
@@ -56,15 +95,21 @@ class JSeqArray {
     return $result;
   }
 
+  /**
+   * @return boolean
+   */
   function isEmpty() {
     return $this->getLength() === 0;
   }
 
-  function find($callback) {
+  /**
+   * @param callable $callback (mixed $item, int $index, array $array): mixed|null
+  */
+  function find(callable $callback) {
     $result = null;
 
     foreach($this->array as $index => $item) {
-      if($callback($item, $index)) {
+      if($callback($item, $index, $this->array)) {
         $result = $item;
         break;
       }
@@ -73,12 +118,19 @@ class JSeqArray {
     return $result;
   }
 
+  /**
+   * @return int
+  */
   function indexOf($value) {
     $result = array_search($value, $this->array);
     return $result === false ? -1 : $result;
   }
 
-  function flat($depth = 1) {
+  /**
+   * @param int $depth
+   * @return JSeqArray
+  */
+  function flat(int $depth = 1) {
     function iter($depth, $current, $result = []) {
       if($depth === 0) return $current;
 
@@ -93,62 +145,157 @@ class JSeqArray {
       return $result;
     }
 
-    return iter($depth, $this->array);
+    return new JSeqArray(iter($depth, $this->array));
   }
 
+  /**
+   * @return boolean
+  */
   function includes($value) {
     return in_array($value, $this->array);
   }
 
+  /**
+   * @param callable $callback (mixed $item, int $index, array $array): void
+   * @return void
+  */
   function forEach($callback) {
     $newArray = $this->clone()->getResult();
-    array_walk($newArray, $callback);
+    
+    foreach($newArray as $index => $item) {
+      $callback($item, $index, $newArray);
+    }
   }
 
+  /**
+   * @return JSeqArray
+  */
   function clone() {
     return new JSeqArray($this->array);
   }
 
-  function join($separator = ',') {
-    implode($separator, $this->array);
+  /**
+   * @param string $separator
+   * @return string
+  */
+  function join(string $separator = ',') {
+    return implode($separator, $this->array);
   }
 
+  /**
+   * Mutate original array
+   * @param mixed $values
+   * @return int length of the final array
+  */
   function push(...$values) {
-    $newArray = $this->clone()->getResult();
-    array_push($newArray, $values);
-
-    return $newArray;
+    array_push($this->array, $values);
+    return $this->getLength();
   }
 
+  /**
+   * Mutate original array
+   * @return mixed|null last element of the array or null if the array is empty
+  */
   function pop() {
+    if($this->isEmpty()) return null;
     return array_pop($this->array);
   }
 
+  /**
+   * Mutate original array
+   * @return mixed|null first element of the array or null if the array is empty
+  */
   function shift() {
+    if($this->isEmpty()) return null;
     return array_shift($this->array);
   }
 
+  /**
+   * Mutate original array
+   * @param mixed $values
+   * @return int length of the final array
+  */
   function unshift(...$values) {
-    return array_unshift($this->array, $values);
+    array_unshift($this->array, $values);
+    return $this->getLength();
   }
 
-  function reduce($callback, $initial = 0) {
-    return array_reduce($this->array, $callback, $initial);
+  /**
+   * @param callable $callback (mixed $initial, mixed $item, int $index, array $array): mixed
+  */
+  function reduce(callable $callback, mixed $initial = null) {
+    $newArray = $this->clone()->getResult();
+
+    if(is_null($initial)) {
+      $initial = array_shift($newArray);
+    }
+
+    foreach($newArray as $index => $item) {
+      $initial = $callback($initial, $item, $index, $newArray);
+    }
+
+    return $initial;
   }
 
-  function slice($start, $end) {
+  /**
+   * @param int $start
+   * @param int $end
+   * @return JSeqArray
+  */
+  function slice(int $begin = 0, int $end = null) {
+    $length = $this->getLength();
+    $cloned = [];
 
+    if(is_null($end)) $end = $length;
+
+    $start = $begin;
+    $start = ($start >= 0) ? $start : $length + $start;
+
+    $upTo = $end;
+    if ($end < 0) {
+      $upTo = $length + $end;
+    }
+
+    $size = $upTo - $start;
+
+    if ($size > 0) {
+      for ($i = 0; $i < $size; $i++) {
+        $cloned[$i] = $this->array[$start + $i];
+      }
+    } else {
+      for ($i = 0; $i < $size; $i++) {
+        $cloned[$i] = $this->array[$start + $i];
+      }
+    }
+  
+    return $cloned;
   }
 
-  function sort($callback) {
-    return usort($this->clone()->getResult(), $callback);
+  /**
+   * Mutate original array
+   * @param callable $callback ($prev, $current): 1|-1|0
+   * @return JSeqArray
+  */
+  function sort(callable $callback) {
+    usort($this->array, $callback);
+
+    return $this;
   }
 
+  /**
+   * @return JSeqArray
+  */
   function concat(...$arrays) {
-    return array_merge($this->array, $arrays);
+    array_merge($this->array, $arrays);
+    return $this;
   }
 
+  /**
+   * Mutate original array
+   * @return JSeqArray
+  */
   function reverse() {
-    return array_reverse($this->array);
+    array_reverse($this->array);
+    return $this;
   }
 }
