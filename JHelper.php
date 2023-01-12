@@ -44,10 +44,6 @@ class JHelper {
     return filter_input(INPUT_POST, $fieldName, FILTER_SANITIZE_SPECIAL_CHARS);
   }
 
-  static function getRelativePath() {
-    return explode('?', $_SERVER['REQUEST_URI'])[0];
-  }
-
   static function isAssocArray($arr) {
     return array_keys($arr) !== range(0, count($arr) - 1);
   }
@@ -71,5 +67,23 @@ class JHelper {
   static function includeFile($filepath, $params = []) {
     $params;
     include $filepath;
+  }
+
+  static function getUrlInfo() {
+    $requestUrlParts = explode('?', $_SERVER['REQUEST_URI']);
+    $query = '';
+    parse_str($requestUrlParts[1], $query);
+
+    return [
+      'host' => $_SERVER['HTTP_HOST'],
+      'path' => $requestUrlParts[0],
+      'query' => $query,
+      'agent' => $_SERVER['HTTP_USER_AGENT'],
+      'protocol' => $_SERVER['REQUEST_SCHEME'],
+    ];
+  }
+
+  static function getPathWithoutRoot() {
+    return substr(__DIR__, strlen($_SERVER['DOCUMENT_ROOT']));
   }
 }
