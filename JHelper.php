@@ -86,4 +86,31 @@ class JHelper {
   static function getPathWithoutRoot() {
     return substr(__DIR__, strlen($_SERVER['DOCUMENT_ROOT']));
   }
+
+  function request($url, $headers = [], $data = []) {
+    $ch = curl_init($url);
+  
+    if(!empty($data)) {
+      curl_setopt($ch, CURLOPT_POST, 1);
+      curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+    }
+  
+    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_HEADER, false);
+  
+    $result = ['status' => 'success'];
+  
+    try {
+      $result['data'] = curl_exec($ch);
+    } catch(Exception $error) {
+      $result['error'] = $error;
+      $result['status'] = 'fail';
+    }
+  
+    curl_close($ch);
+  
+    return $result;
+  }
 }
