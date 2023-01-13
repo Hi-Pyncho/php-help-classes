@@ -87,7 +87,7 @@ class JHelper {
     return substr(__DIR__, strlen($_SERVER['DOCUMENT_ROOT']));
   }
 
-  function request($url, $headers = [], $data = []) {
+  static function request($url, $headers = [], $data = []) {
     $ch = curl_init($url);
   
     if(!empty($data)) {
