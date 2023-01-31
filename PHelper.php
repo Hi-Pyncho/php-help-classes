@@ -1,6 +1,6 @@
 <?php
 
-class JHelper {
+class PHelper {
   static function debug($data) {
     echo '<pre>';
     echo print_r($data, true);
@@ -83,8 +83,8 @@ class JHelper {
     ];
   }
 
-  static function getPathWithoutRoot() {
-    return substr(__DIR__, strlen($_SERVER['DOCUMENT_ROOT']));
+  static function getPathWithoutRoot($path) {
+    return substr($path, strlen($_SERVER['DOCUMENT_ROOT']));
   }
 
   static function request($url, $headers = [], $data = []) {
