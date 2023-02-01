@@ -1,6 +1,12 @@
 <?php
 
-class JDB {
+class PDB {
+  private string $host;
+  private string $user;
+  private string $password;
+  private string $dbName;
+  private PDO $connection;
+
   function __construct($host, $user, $password, $dbName) {
     $this->host = $host;
     $this->user = $user;
@@ -8,7 +14,7 @@ class JDB {
     $this->dbName = $dbName;
   }
 
-  public function createConnection() {
+  public function createConnection() : PDB {
     $dataSourceName = 'mysql:host=' . $this->host . ';dbname=' . $this->dbName;
     $options = [
       PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -17,9 +23,11 @@ class JDB {
     ];
     
     $this->connection = new PDO($dataSourceName, $this->user, $this->password, $options);
+
+    return $this;
   }
 
-  public function query($query, $keys = []) {
+  public function query(string $query, array $keys = []) : array {
     if(empty($keys)) {
       return $this->queryWithoutParams($query);
     }
@@ -35,7 +43,7 @@ class JDB {
     return $result;
   }
 
-  protected function queryWithoutParams($query) {
+  protected function queryWithoutParams($query) : array {
     $queryResult = $this->connection->query($query);
     $result = [];
     
