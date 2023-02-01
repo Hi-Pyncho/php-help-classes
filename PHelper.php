@@ -7,14 +7,15 @@ class PHelper {
     echo '</pre>';
   }
 
-  static function setExeptionsHandler() {
-    set_exception_handler(function(Throwable $exception) {
-      $message = "<b style='color: red;'>Uncaught exception</b>: ";
-      $message .= "<pre><b>FILE</b>: " . $exception->getFile() . "</pre>";
-      $message .= "<pre><b>MESSAGE</b>: " . $exception->getMessage() . "</pre>";
-      $message .= "<pre><b>LINE</b>: " . $exception->getLine() . "</pre>";
-    
-      echo $message;
+  static function setExeptionsHandler() : void {
+    set_exception_handler(function(Throwable $exception) : void {
+      http_response_code(500);
+      echo json_encode([
+        'code' => $exception->getCode(),
+        'message' => $exception->getMessage(),
+        'file' => $exception->getFile(),
+        'line' => $exception->getLine(),
+      ]);
     });
   }
 
