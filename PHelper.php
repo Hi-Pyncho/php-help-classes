@@ -83,7 +83,10 @@ class PHelper {
   }
 
   static function getPathWithoutRoot(string $path) : string {
-    return substr($path, strlen($_SERVER['DOCUMENT_ROOT']));
+    $path = substr($path, strlen($_SERVER['DOCUMENT_ROOT']));
+    $startsWithSlash = mb_substr($path, 0, 1) === '/';
+    
+    return $startsWithSlash ? $path : '/' . $path;
   }
 
   static function request(string $url, array $headers = [], array $data = []) : array {
