@@ -63,9 +63,9 @@ class PHelper {
     rmdir($path);
   }
 
-  static function includeFile(string $filepath, array $params = []) : void {
+  static function includeFile(string $filepath, array $params = []) {
     $params;
-    include $filepath;
+    return include $filepath;
   }
 
   static function getUrlInfo() : array {
