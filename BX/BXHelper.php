@@ -12,7 +12,7 @@ class BXHelper {
     $arSelect = array_merge(["ID", "IBLOCK_ID", "*", "PROPERTY_*"], $select);
     $arFilter = array_merge(["IBLOCK_ID" => $iblockId, "ACTIVE" => "Y"], $filter);
  
-    $res = CIBlockElement::GetList($order, $arFilter, false, ["nPageSize"=>500], $arSelect);
+    $res = CIBlockElement::GetList($order, $arFilter, false, false, $arSelect);
     $result = [];
 
     while($ob = $res->GetNextElement()) {
