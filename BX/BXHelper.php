@@ -59,4 +59,8 @@ class BXHelper {
 
     return $res;
   }
+
+  static function updateProps($elementId, $props) : void {
+    CIBlockElement::SetPropertyValuesEx($elementId, false, $props);
+  }
 }
